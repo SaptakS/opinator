@@ -2,8 +2,7 @@ chrome.browserAction.onClicked.addListener(
 				function(tab)
 				{
 
-					//chrome.tabs.executeScript(null, {code:"var url = document.URL;alert(url)"});
-					
+					//to execute a script on clicking the plugin					
 					chrome.tabs.executeScript(null, {file: "script.js"});
 						
 				});
