@@ -13,3 +13,5 @@ The project uses Scrapy to scrape data from ecommerce websites.
 * DriverPHP.php will decide which "Spider" to call based on the url and the
   corresponding "ScrapyDriver" file would be executed.
 * ScrapyDriver_AmazonSpider.py executes the "Spider" through command line.
+
+### Scrapy version: 0.24.0
