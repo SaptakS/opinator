@@ -13,6 +13,7 @@ The project uses Scrapy to scrape data from ecommerce websites.
 * The script.js file checks whether the url of the current tab matches the regular expression to be a valid product page of Amazon.
   It then extracts the product code and sends it to DriverPHP.php of Review Extraction Module for review scraping and sentiment analysis.
 * On returning sentiment analysis, script.js prints the sentiment on the product page.
+
 ###Review Extraction Module
 * DriverPHP.php executes the ScrapyDriver_AmazonSpider.py, giving ProductID of the product as command line
   argument.
