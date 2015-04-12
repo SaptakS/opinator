@@ -1,4 +1,4 @@
-# opinator
+## opinator
 A plugin to do sentiment analysis of reviews in ecommerce website.
 
 # OpinatorScraper
