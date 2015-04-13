@@ -7,7 +7,7 @@
 
 from scrapy.item import Item, Field
 
-class OpinatorscraperItem(Item):
+class revscraperItem(Item):
     reviews = Field ()
     product_id = Field ()
     website_name = Field ()

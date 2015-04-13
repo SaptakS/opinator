@@ -7,10 +7,10 @@
 
 
 
-BOT_NAME = 'OpinatorScraper'
+BOT_NAME = 'revscraper'
 
-SPIDER_MODULES = ['OpinatorScraper.spiders']
-NEWSPIDER_MODULE = 'OpinatorScraper.spiders'
+SPIDER_MODULES = ['src.spiders']
+NEWSPIDER_MODULE = 'src.spiders'
 
 DATABASE = {
     'drivername': 'mysql',
@@ -21,4 +21,4 @@ DATABASE = {
     'database': 'op12'
 }
 
-ITEM_PIPELINES = ['OpinatorScraper.pipelines.OpinatorscraperPipeline']
+ITEM_PIPELINES = ['src.pipelines.revscraperPipeline']

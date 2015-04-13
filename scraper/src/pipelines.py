@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from op_tables import Reviews, Product, Sentiment
 from op_tables import db_connect, create_tables
 
-class OpinatorscraperPipeline(object):
+class revscraperPipeline(object):
     """Opinatorscraper pipeline for storing scraped items in the database"""
 
     def __init__(self):
