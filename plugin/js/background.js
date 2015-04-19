@@ -13,12 +13,12 @@ function init() {
 
 //execute the script when a new url is loaded in the tab or when the page is refreshed
 chrome.tabs.onUpdated.addListener(function(activeInfo){
-	chrome.tabs.executeScript(null, {file: "jquery-1.11.1.js"});
-	chrome.tabs.executeScript(null, {file: "script.js"});
+	chrome.tabs.executeScript(null, {file: "js/jquery-1.11.1.js"});
+	chrome.tabs.executeScript(null, {file: "js/script.js"});
 });
 
 //execute the script when a new tab is created with a url		
 chrome.tabs.onCreated.addListener(function(tab) {
-	chrome.tabs.executeScript(null, {file: "jquery-1.11.1.js"});
-	chrome.tabs.executeScript(null, {file: "script.js"});
+	chrome.tabs.executeScript(null, {file: "js/jquery-1.11.1.js"});
+	chrome.tabs.executeScript(null, {file: "js/script.js"});
 });

@@ -2,9 +2,9 @@
 	"name" : "Opinator",
 	"version" : "1.0.0",
 	"manifest_version":2,
-	"description" : "Change background to yellow",
+	"description" : "Sentiment Analysis of Product Reviews",
 	"browser_action" : {
-		"name" : "Yellow Extension",
+		"name" : "Opinator",
 		"default_icon": "icons/images19.png"
 	},
 	"background": {

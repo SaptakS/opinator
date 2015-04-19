@@ -29,18 +29,19 @@ window.onload = function(){
 	//to display the review	
 	function addReview(data) {
 
-		// checks if already added. If nof added then adds the display
+		// checks if already added. If not added then adds the display
 		if(!$('.opinator')[0]) {
 
 			//creating a new div with classname as opinator	
 			var div = document.createElement('div');		
 			div.className = 'opinator';
-			
+						
 			//creating a button
-			div.innerHTML = '<button value="opinator" style="background: aquamarine;width: 300px;height: 100px;position: fixed;left: 35%;top: 30%;opacity: .8;border-radius: 20px;">'+data+'</button>';
+			div.innerHTML = '<button value="opinator" style="background: aquamarine;width: 300px;height: 100px;position: relative;left: 35%;top: -5em;opacity: .8;border-radius: 20px;">'+data+'</button>';
 			
-			//append to the body
-			document.body.appendChild(div);
+			//appending it to the exact location.
+			$('ul.a-button-list').append(div);
+			
 		}			
 	}
 
@@ -65,14 +66,14 @@ window.onload = function(){
 		alert(pCode);
 
 
-		/*
+		
 		//here we put the code to send the product code to driverphp to extract review and do sentiment analysis.
-		var posting = $.post( "http://172.19.13.50/OpinatorScraper/DriverPHP.php", { isbn_code : pCode } );
+		var posting = $.post( "http://172.19.13.67/opinator/test.php", { product_code : pCode } );
 
 		// Put the results in a div
 		posting.done(function( data ) {
-		//addReview(data);
-		alert("Data Loaded: " + data);
-		});*/
+			addReview(data);
+			//alert("Data Loaded: " + data);
+		});
 	}
 }
