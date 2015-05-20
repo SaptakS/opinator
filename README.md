@@ -6,6 +6,21 @@ Scrapes reviews from ecommerce websites.
 
 The project uses Scrapy to scrape data from ecommerce websites.
 
+##Implementing the project
+####Plugin
+* Go to chrome://extensions in your google chrome browser.
+* Check the 'Developer mode' checkbox.
+* click on 'load unpacked extension..' and browse to the plugin folder.
+
+####Scrapy
+* install the requirements from requirement.txt
+
+####Sentiment Analysis
+* install pexpect, xmltodict, unidecode
+* download and unzip stanford-corenlp-full-2014-08-27.zip in the scraper folder
+
+If you are on redhat linux please look into your SELinux settings for running JVM 
+
 ## Functioning of the project
 #### Plugin Module
 * The background.js ensures that on creating a new tab or updating the url of the new tab, the script.js for
