@@ -9,5 +9,3 @@ from scrapy.item import Item, Field
 
 class revscraperItem(Item):
     reviews = Field ()
-    product_id = Field ()
-    website_name = Field ()
