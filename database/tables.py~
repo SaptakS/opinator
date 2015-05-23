@@ -1,9 +1,9 @@
+from dbsettings import DBCONFIG
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import  declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Numeric
-
-from dbsettings import DBCONFIG
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Numeric
 
 Base = declarative_base()
 
@@ -14,7 +14,7 @@ class AmazonIN (Base):
 
     product_id = Column(String(20), primary_key=True)
     url = Column (String(250), nullable=False)
-    sentiment_score = Column (Numeric(3, 2))
+    sentiment_score = Column (Numeric(precision=3))
     sentiment = Column (String(8), nullable=False)
     added_on = Column (DateTime, nullable=False)
     modified_on = Column (DateTime, nullable=False)

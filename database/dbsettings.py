@@ -4,7 +4,7 @@ DBCONFIG = {
     'port': '3306',
     'username': 'vivek',
     'password': 'vivek',
-    'database': 'op12'
+    'database': 'op18'
 }
 
-LIFESPAN = 30 #the time duration for which sentiment is valid
+LIFESPAN = 30 # Number of days for which sentiment is valid

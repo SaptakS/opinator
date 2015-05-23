@@ -1,15 +1,16 @@
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 from scrapy.http import Request, HtmlResponse
+
 from src.items import revscraperItem
 
 class ReviewScraper (CrawlSpider):
     name = "revscraper"
-    allowed_domains = ["amazon.in"]
 
     def __init__(self, product_id):
         self.counter = 0
         self.product_id = product_id
+        self.allowed_domains = ["amazon.in"]
 
     def start_requests(self):
         for i in range(30):
