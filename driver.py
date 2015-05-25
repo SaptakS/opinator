@@ -4,7 +4,7 @@ from subprocess import Popen
 
 sys.path[:0] = ['/var/www/html/opinator/database', '/var/www/html/opinator/mindwrap']
 
-from dbdriver import driver
+from dbdriver import Driver
 from sentiment import sentiment_calculator
 
 def drive():
@@ -21,7 +21,8 @@ def drive():
     product_id = 'B00VEB055E'
     website_name = 'AmazonIN'
     url = 'http://www.amazon.in/gp/product/B00VEB055E/ref=s9_ri_gw_g23_i2?pf_rd_m=A1VBAL9TL5WCBF&pf_rd_s=center-3&pf_rd_r=0X4SSMGC8SMPYGX1QV2P&pf_rd_t=101&pf_rd_p=609217867&pf_rd_i=1320006031'
-    status, sentiment = driver(website_name=website_name, product_id=product_id, action='query')
+    query_obj = Driver(website_name=website_name, product_id=product_id, action='query')
+    status, sentiment = query_obj.drive()
 
     update_flag = 0
     if status == 'outdated':
@@ -51,13 +52,15 @@ def drive():
 
     # update the database
     if update_flag == 1:
-        driver(website_name=website_name, product_id=product_id, action='update', url=url,
-                sentiment_score=sentiment_score, sentiment=sentiment)
+        update_obj = Driver(website_name=website_name, product_id=product_id, action='update', url=url,
+                                sentiment_score=sentiment_score, sentiment=sentiment)
+        update_obj.drive()
         print 'updated'
         return
     else:
-        driver(website_name=website_name, product_id=product_id, action='insert', url=url,
-                sentiment_score=sentiment_score, sentiment=sentiment)
+        insert_obj = Driver(website_name=website_name, product_id=product_id, action='insert', url=url,
+                                sentiment_score=sentiment_score, sentiment=sentiment)
+        insert_obj.drive()
         print 'inserted'
         return
 

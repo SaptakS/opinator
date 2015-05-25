@@ -1,55 +1,70 @@
 from datetime import datetime, timedelta
 
-from update import update
-from query import query
-from insert import insert
+from operations import Operations
 from dbsettings import LIFESPAN
 
-def query_handler(website_name, product_id):
-    """Handler function for query before scraping"""
+class Driver():
+    """Drives the database"""
 
-    # query for given website_name and product_id
-    product_modified_on, product_sentiment = query(website_name, product_id)
+    def __init__(self, action, website_name, product_id,
+                    url=None, sentiment_score=None, sentiment=None):
+        """Initialize the variables with data from backend driver"""
 
-    # check if the product is in database or not
-    if product_modified_on == None:
-        return ('absent', None)
+        self.action = action.lower()
+        self.website_name = website_name
+        self.product_id = product_id
+        self.url = url
+        self.sentiment_score = sentiment_score
+        self.sentiment = sentiment
 
-    # check if the product is valid or outdated
-    current_datetime = datetime.now()
-    valid_modified_on = current_datetime - timedelta(days=LIFESPAN)
+    def query_handler(self, operation):
+        """Handler function for query before scraping"""
 
-    if valid_modified_on <= product_modified_on:
-        return ('present', product_sentiment)
-    else:
-        return ('outdated', None)
+        # query for given website_name and product_id
+        product_modified_on, product_sentiment = operation.query()
 
-def update_handler(website_name, product_id, action, url,
-			        sentiment_score, sentiment):
-    """Handler function for update operation"""
+        # check if the product is in database or not
+        if product_modified_on == None:
+            return ('absent', None)
 
-    return update(website_name=website_name, product_id=product_id, url=url,
-                    sentiment_score=sentiment_score, sentiment=sentiment)
+        # check if the product is valid or outdated
+        current_datetime = datetime.now()
+        valid_modified_on = current_datetime - timedelta(days=LIFESPAN)
 
-def insert_handler(website_name, product_id, action, url,
-			        sentiment_score, sentiment):
-    """Handler function for insert operation"""
+        if valid_modified_on <= product_modified_on:
+            return ('present', product_sentiment)
+        else:
+            return ('outdated', None)
 
-    return insert(website_name=website_name, product_id=product_id, url=url,
-                    sentiment_score=sentiment_score, sentiment=sentiment)
+    def update_handler(self, operation):
+        """Handler function for update operation"""
 
-def driver(website_name, product_id, action, url=None,
-            sentiment_score=None, sentiment=None):
-    """Manages all the work related to database"""
+        return operation.update()
 
-    action = action.lower()
-    if action == 'query':
-        return query_handler(website_name, product_id)
+    def insert_handler(self, operation):
+        """Handler function for insert operation"""
 
-    elif action == 'update':
-	    return update_handler(website_name, product_id, action, url,
-		                        sentiment_score, sentiment)
+        return operation.insert()
 
-    elif action == 'insert':
-	    return insert_handler(website_name, product_id, action, url,
-		                    	sentiment_score, sentiment)
+    def drive(self):
+        """Main method to drive the database"""
+
+        if self.action == 'query':
+
+            # create an operation object
+            operation = Operations(website_name=self.website_name, product_id=self.product_id)
+            return self.query_handler(operation)
+
+        elif self.action == 'update':
+
+            # create an operation object
+            operation = Operations(website_name=self.website_name, product_id=self.product_id, url=self.url,
+                                            sentiment_score=self.sentiment_score, sentiment=self.sentiment)
+            return self.update_handler(operation)
+
+        elif self.action == 'insert':
+
+            # create an operation object
+            operation = Operations(website_name=self.website_name, product_id=self.product_id, url=self.url,
+                                        sentiment_score=self.sentiment_score, sentiment=self.sentiment)
+            return self.insert_handler(operation)
