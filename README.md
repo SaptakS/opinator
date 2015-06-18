@@ -24,22 +24,20 @@ The project uses Scrapy to scrape data from ecommerce websites.
     type in following command in the terminal: export _JAVA_OPTIONS="-Xmx256M"
 
 ## Functioning of the project
-* driver.py file handles the whole backend of the project.
-* The plugin code is expected to send product_id, website_name(in a particular
-  format) and the review page url.
+* The flask server handles the whole backend of the project.
+* The plugin code is expected to send product_id, website_name and the review page url through Ajax.
 * The data from plugin is received in the driver file and it is first checked
-  if the product is already in the database and is not 'outdated'. (not
-    implemented yet)
+  if the product is already in the database and is not 'outdated'.
 * If not outdated, just send the sentiment to plugin and exit.
 * Otherwise, scraper is run and the reviews are placed in
   /opinator/mindwrap/raw_text/new_sample.
 * Then, to run the SA, sentiment_calculator is run. It returns the sentiment
   score and the sentiment.
-* Send the sentiment to the plugin (not implemented yet)
+* Send the sentiment to the plugin
 * Insert/Update the database.
 
 #### Review Extraction Module
-* We use Python' Scrapy framework for review extraction.
+* We use Python's Scrapy framework for review extraction.
 * For each website, different spider will run
 * The driver will decide which spider to run and corresponding shell cmd will
   be executed.
