@@ -1,4 +1,5 @@
 class revscraperPipeline(object):
+
     """ Pipeline to a txt file """
     def process_item(self, item, spider):
         reviews = item['reviews']

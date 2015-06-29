@@ -12,15 +12,34 @@ The project uses Scrapy to scrape data from ecommerce websites.
 * install the requirements from requirement.txt
 
 ####Sentiment Analysis
-* install pexpect, xmltodict, unidecode
-* download and unzip stanford-corenlp-full-2014-08-27.zip in the scraper folder
+* We use stanford's nlp package temporarily, written in java with a python
+  wrapper.
+* Download it from here:
+    https://bitbucket.org/torotoki/corenlp-python
+* If required - install pexpect, xmltodict, unidecode
+* Unzip stanford-corenlp-full-2014-08-27.zip in the opinator folder, delete the rest.
 
-If you are on redhat linux please look into your SELinux settings for running JVM 
+* If you are on redhat linux please look into your SELinux settings for running JVM 
+* If you get following error: Could not reserve enough space for object heap
+    type in following command in the terminal: export _JAVA_OPTIONS="-Xmx256M"
 
 ## Functioning of the project
+* The flask server handles the whole backend of the project.
+* The plugin code is expected to send product_id, website_name and the review page url through Ajax.
+* The data from plugin is received in the driver file and it is first checked
+  if the product is already in the database and is not 'outdated'.
+* If not outdated, just send the sentiment to plugin and exit.
+* Otherwise, scraper is run and the reviews are placed in
+  /opinator/mindwrap/raw_text/new_sample.
+* Then, to run the SA, sentiment_calculator is run. It returns the sentiment
+  score and the sentiment.
+* Send the sentiment to the plugin
+* Insert/Update the database.
 
 #### Review Extraction Module
-* driverPHP.php executes the scrapyDriverFile.py, giving ProductID of the product as command line
-  argument.
-* scrapyDriverFile.py executes the "Spider" through command line.
-
+* We use Python's Scrapy framework for review extraction.
+* For each website, different spider will run
+* The driver will decide which spider to run and corresponding shell cmd will
+  be executed.
+* Whatever data the scraper requires (product id and/or url), is passed through
+  CLI arguments.
