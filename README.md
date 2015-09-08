@@ -10,7 +10,7 @@ A plugin to do sentiment analysis of reviews in ecommerce website.
 * Click on `load unpacked extension` and browse to the plugin folder.
 
 ####Flask
-* Install the requirements from [requirements.txt](https://github.com/SaptakS/opinator/blob/master/requirements.txt)
+* Install the [requirements](https://github.com/SaptakS/opinator/blob/master/requirements.txt)
 * Run the [run.py](https://github.com/SaptakS/opinator/blob/master/run.py) module. This will start your flask server.
 
 ####Sentiment
