@@ -1,45 +1,26 @@
 ## opinator
-The back end for a plugin to do sentiment analysis of reviews in ecommerce website.
-
-# OpinatorScraper
-Scrapes reviews from ecommerce websites.
-
-The project uses Scrapy to scrape data from ecommerce websites.
+A plugin to do sentiment analysis of reviews in ecommerce website.
 
 ##Implementing the project
+####Plugin
+* The plugin code can be found [here](https://github.com/SaptakS/opinator-plugin)
+* Clone the repo to your local machine.
+* Go to chrome://extensions in your google chrome browser.
+* Check the `Developer mode` checkbox.
+* Click on `load unpacked extension` and browse to the plugin folder.
 
-####Scrapy
-* install the requirements from requirement.txt
+####Flask
+* Install the requirements from [requirements.txt]()
+* Run the [run.py]() module. This will start your flask server.
 
-####Sentiment Analysis
-* We use stanford's nlp package temporarily, written in java with a python
-  wrapper.
-* Download it from here:
-    https://bitbucket.org/torotoki/corenlp-python
-* If required - install pexpect, xmltodict, unidecode
-* Unzip stanford-corenlp-full-2014-08-27.zip in the opinator folder, delete the rest.
+####Sentiment
+* Download the stanford corenlp module from [here](http://nlp.stanford.edu/software/corenlp.shtml)
+* Unzip it and place it in [mindwrap]().
+* Execute `export _JAVA_OPTIONS="-Xmx1024M"` in terminal.
+* Run [corenlp.py]() module.
 
-* If you are on redhat linux please look into your SELinux settings for running JVM 
-* If you get following error: Could not reserve enough space for object heap
-    type in following command in the terminal: export _JAVA_OPTIONS="-Xmx256M"
-
-## Functioning of the project
-* The flask server handles the whole backend of the project.
-* The plugin code is expected to send product_id, website_name and the review page url through Ajax.
-* The data from plugin is received in the driver file and it is first checked
-  if the product is already in the database and is not 'outdated'.
-* If not outdated, just send the sentiment to plugin and exit.
-* Otherwise, scraper is run and the reviews are placed in
-  /opinator/mindwrap/raw_text/new_sample.
-* Then, to run the SA, sentiment_calculator is run. It returns the sentiment
-  score and the sentiment.
-* Send the sentiment to the plugin
-* Insert/Update the database.
-
-#### Review Extraction Module
-* We use Python's Scrapy framework for review extraction.
-* For each website, different spider will run
-* The driver will decide which spider to run and corresponding shell cmd will
-  be executed.
-* Whatever data the scraper requires (product id and/or url), is passed through
-  CLI arguments.
+####Database
+* Make a mysql user `vivek` with pass `vivek`
+* Make a mysql database named `op20`
+* [Grant all privileges to the user to this database](http://stackoverflow.com/questions/5016505/mysql-grant-all-privileges-on-database)
+* Move the [db_create.py]() to its parent folder, run it and move it back.

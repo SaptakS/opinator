@@ -47,3 +47,10 @@ Temporary Items
 #pyc and py~ files
 *.pyc
 *.py~
+
+#corenlp
+mindwrap/stanford-corenlp-full-2015-04-20/
+
+*.wsgi
+
+db_repository

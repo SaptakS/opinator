@@ -101,7 +101,14 @@ def init_corenlp_command(corenlp_path, memory, properties):
             "xom.jar",
             "joda-time.jar",
             "jollyday.jar",
-            "ejml-?.*.jar"] # No idea what this is but it might be sentiment
+            "ejml-?.*.jar", # No idea what this is but it might be sentiment
+            "javax.json-api-1.0-sources.jar",
+            "javax.json.jar",
+            "joda-time-2.1-sources.jar",
+            "jollyday-0.4.7-sources.jar",
+            "stanford-corenlp-3.4.1-javadoc.jar",
+            "stanford-corenlp-3.4.1-sources.jar",
+            "xom-1.2.10-src.jar"]
 
     java_path = "java"
     classname = "edu.stanford.nlp.pipeline.StanfordCoreNLP"
@@ -129,6 +136,7 @@ def init_corenlp_command(corenlp_path, memory, properties):
     else:
         limit = ""
 
+    print "%s %s -cp %s %s %s" % (java_path, limit, ':'.join(jars), classname, props)
     return "%s %s -cp %s %s %s" % (java_path, limit, ':'.join(jars), classname, props)
 
 
@@ -176,7 +184,11 @@ def parse_parser_results(text):
         line = line.strip()
 
         if line.startswith("Sentence #"):
-            sentence = {'words': [], 'parsetree': [], 'dependencies': [], 'indexeddependencies': []}
+            index = line.index("sentiment: ")
+            length = len("sentiment: ")
+            sentiment = line[(index+length): -2]
+            sentence = {'sentiment': [], 'words': [], 'parsetree': [], 'dependencies': [], 'indexeddependencies': []}
+            sentence['sentiment'] = sentiment
             results["sentences"].append(sentence)
             state = STATE_TEXT
 
@@ -296,8 +308,7 @@ def parse_parser_xml_results(xml, file_name="", raw_output=False):
         coref_flag = False
 
     # This is also specific case of xmltodict
-    raw_sent_list = enforceList(raw_sent_list)
-
+    raw_sent_list = enforceList(raw_sent_list) 
     sentences = []
     for id in xrange(len(raw_sent_list)):
         sent = {}
@@ -346,7 +357,8 @@ def parse_xml_output(input_dir, corenlp_path=DIRECTORY, memory="3g", raw_output=
         + ' -filelist %s -outputDirectory %s' % (file_list.name, xml_dir)
 
     #creates the xml file of parser output:
-
+    print "DIRECTORY: ", DIRECTORY
+    print "command:", command
     call(command, shell=True)
 
     #reading in the raw xml file:
@@ -356,7 +368,7 @@ def parse_xml_output(input_dir, corenlp_path=DIRECTORY, memory="3g", raw_output=
 	    for output_file in os.listdir(xml_dir):
 		with open(xml_dir + '/' + output_file, 'r') as xml:
 			parsed = xml.read()
-			#print parsed
+			print parsed
 			#doc = xmltodict.parse(parsed)
 			#print doc
 			file_name = re.sub('.xml$', '', os.path.basename(output_file))
@@ -365,7 +377,7 @@ def parse_xml_output(input_dir, corenlp_path=DIRECTORY, memory="3g", raw_output=
 			#                              raw_output=raw_output)
     finally:
     	   file_list.close()
-	   shutil.rmtree(xml_dir)
+	    #shutil.rmtree(xml_dir)
      	   return result
 
 
@@ -378,11 +390,13 @@ class StanfordCoreNLP:
 
     def _spawn_corenlp(self):
         if VERBOSE:
+            print "Other verbose entered: "
             print self.start_corenlp
         self.corenlp = pexpect.spawn(self.start_corenlp, timeout=60, maxread=8192, searchwindowsize=80)
 
         # show progress bar while loading the models
         if VERBOSE:
+            print "Verbose entered: "
             widgets = ['Loading Models: ', Fraction()]
             pbar = ProgressBar(widgets=widgets, maxval=5, force_update=True).start()
             # Model timeouts:
@@ -409,7 +423,9 @@ class StanfordCoreNLP:
 
         # spawn the server
         self.serving = serving
-        self.start_corenlp = init_corenlp_command(corenlp_path, memory, properties)
+        xml_dir_server = tempfile.mkdtemp()
+        self.start_corenlp = "java -cp \"./stanford-corenlp-full-2015-04-20/*\" -Xmx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,parse,sentiment"
+        print "Command for SF parser: ", self.start_corenlp
         self._spawn_corenlp()
 
     def close(self, force=True):
@@ -482,6 +498,7 @@ class StanfordCoreNLP:
         if VERBOSE:
             print "%s\n%s" % ('=' * 40, incoming)
         try:
+            print incoming
             results = parse_parser_results(incoming)
         except Exception as e:
             if VERBOSE:
