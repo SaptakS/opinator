@@ -21,8 +21,8 @@ A plugin to do sentiment analysis of reviews in ecommerce website.
 * This will start your json-rpc server.
 
 ####Database
-* You can skip the below two points if you can make changes to [config.py](https://github.com/SaptakS/opinator/blob/master/config.py)
-* Make a mysql user `vivek` with pass `vivek`
-* Make a mysql database named `op20`
+* You can skip the next point if you can make changes to [DB_URI](https://github.com/SaptakS/opinator/blob/master/config.py#L15)
+* Create a mysql user `vivek` with pass `vivek`
+* Create a mysql database named `op20`
 * [Grant all privileges to the user to this database](http://stackoverflow.com/questions/5016505/mysql-grant-all-privileges-on-database)
 * Move the [db_create.py](https://github.com/SaptakS/opinator/blob/master/database/db_create.py) to its parent folder, run it and move it back.
