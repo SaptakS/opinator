@@ -5,7 +5,7 @@ A plugin to do sentiment analysis of reviews in ecommerce website.
 ####Plugin
 * The plugin code can be found [here](https://github.com/SaptakS/opinator-plugin)
 * Clone the repo to your local machine.
-* Go to chrome://extensions in your google chrome browser.
+* Go to `chrome://extensions` in your google chrome browser.
 * Check the `Developer mode` checkbox.
 * Click on `load unpacked extension` and browse to the plugin folder.
 
@@ -18,7 +18,7 @@ A plugin to do sentiment analysis of reviews in ecommerce website.
 * Unzip it and place it in [mindwrap](https://github.com/SaptakS/opinator/tree/master/mindwrap).
 * Execute `export _JAVA_OPTIONS="-Xmx1024M"` in terminal.
 * Run [corenlp.py](https://github.com/SaptakS/opinator/blob/master/mindwrap/corenlp.py) module.
-* This will start your json-rpc server.
+* This will start your `json-rpc` server.
 
 ####Database
 * You can skip the next point if you can make changes to [DB_URI](https://github.com/SaptakS/opinator/blob/master/config.py#L15)
