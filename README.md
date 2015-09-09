@@ -18,8 +18,10 @@ A plugin to do sentiment analysis of reviews in ecommerce website.
 * Unzip it and place it in [mindwrap](https://github.com/SaptakS/opinator/tree/master/mindwrap).
 * Execute `export _JAVA_OPTIONS="-Xmx1024M"` in terminal.
 * Run [corenlp.py](https://github.com/SaptakS/opinator/blob/master/mindwrap/corenlp.py) module.
+* This will start your json-rpc server.
 
 ####Database
+* You can skip the below two points if you can make changes to [config.py](https://github.com/SaptakS/opinator/blob/master/config.py)
 * Make a mysql user `vivek` with pass `vivek`
 * Make a mysql database named `op20`
 * [Grant all privileges to the user to this database](http://stackoverflow.com/questions/5016505/mysql-grant-all-privileges-on-database)
