@@ -1,4 +1,4 @@
-from flask import request 
+from flask import request
 from flask.json import jsonify
 from datetime import datetime, timedelta
 import scrapy
@@ -81,9 +81,25 @@ def recieve_reviews(reviews):
     #print results
     value = 0
     count = 0
+    positive_count = 0
+    negative_count = 0
+    neutral_count = 0
+    very_positive_count = 0
+    very_negative_count = 0
     for result in results:
         count += 1
         #print result['sentiment']
+        if result['sentiment'] == "Negative":
+            negative_count += 1
+        elif result['sentiment'] == "Very Negative":
+            very_negative_count += 1
+        elif result['sentiment'] == "Positive":
+            positive_count += 1
+        elif result['sentiment'] == "Very Positive":
+            very_positive_count += 1
+        else:
+            neutral_count += 1
+
         value = value + VALUES[result['sentiment']]
         #print "While assigning value"
     if count:
@@ -94,11 +110,13 @@ def recieve_reviews(reviews):
         result = 'Negative'
     elif value > -0.5:
         result = 'Positive'
+        value = abs(value)
     else:
         result = 'Neutral'
 
     #print(result)
-    return (value, result)
+    return (value, result, positive_count, negative_count,
+                very_positive_count, very_negative_count, neutral_count)
 
 @app.route('/', methods=['POST'])
 def plugin_response_handler():
@@ -115,7 +133,7 @@ def plugin_response_handler():
     product = is_present(website_name, product_id)
     if product is not None:
         if is_valid(product):
-            return jsonify(#sentiment_score=str(product.sentiment_score),
+            return jsonify(sentiment_score=str(product.sentiment_score),
                                     sentiment=product.sentiment)
         else:
             outdated = True
@@ -139,12 +157,16 @@ def plugin_response_handler():
     '''
 
     cmd = "scrapy crawl %s -a product_id=%s" % (website_name, product_id)
-    os.chdir("/home/vivek/opinator2/app/scraper")
+    print 'present working directory', os.getcwd()
+    #os.chdir("/home/vivek/temp/opinator4/app/scraper")
+    os.chdir("./scraper")
     os.system(cmd)
     #print 'after scrapy'
     with open('%s.txt' % str(product_id), 'r') as f:
         #print f.read()
-        (value, result) = recieve_reviews(f.read())
+        (value, result, positive_count, negative_count, very_positive_count,
+                very_negative_count, neutral_count) = recieve_reviews(f.read())
+    os.chdir("..")
     if outdated:
         update(website_name=website_name, product_id=product_id, url=url,
                 sentiment_score=value, sentiment=str(result))
@@ -152,4 +174,6 @@ def plugin_response_handler():
         insert(website_name=website_name, product_id=product_id, url=url,
                 sentiment_score=value, sentiment=str(result))
 
-    return jsonify(sentiment_score=str(value), sentiment=str(result))
+    return jsonify(sentiment_score=str(value), sentiment=str(result), positive_count=str(positive_count),
+                    negative_count=str(negative_count), very_positive_count=str(very_positive_count),
+                        very_negative_count=str(very_negative_count), neutral_count=str(neutral_count))

@@ -18,14 +18,14 @@ class AmazonINScraper (CrawlSpider):
         for i in range(5):
             if self.counter > 25:
                 break
-            url = 'http://www.amazon.in/product-reviews/%s/ref=cm_cr_pr_btm_link_2?ie=UTF8&pageNumber=%d&showViewpoints=0&sortBy=byRankDescending' % (self.product_id, i)
+            url = "http://www.amazon.in/product-reviews/%s/ref=cm_cr_pr_btm_link_11?showViewpoints=1&sortBy=helpful&reviewerType=all_reviews&filterByStar=all_stars&pageNumber=%d"% (self.product_id, i)
             yield self.make_requests_from_url(url)
 
     def parse (self, response):
 
         select = Selector(response)
         item = items.scraperItem()
-        x = select.xpath ('//div[@class="reviewText"]/text()').extract()
+        x = select.xpath ('//span[@class="a-size-base review-text"]/text()').extract()
         if x != []:
             self.counter += len (x)
             item['reviews'] = x
