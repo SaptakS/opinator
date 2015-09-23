@@ -3,8 +3,6 @@ from .. import items
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 from scrapy.http import Request, HtmlResponse
-#from scraper.source.items import scraperItem
-#import urllib, httplib
 
 class AmazonINScraper (CrawlSpider):
     name = "amazonIN"
@@ -30,8 +28,4 @@ class AmazonINScraper (CrawlSpider):
             self.counter += len (x)
             item['reviews'] = x
             item['file_'] = str(self.product_id)
-            #params = urllib.urlencode({'reviews': x})
-            #headers = {"Content-type": "application/json"}
-            #conn = httplib.HTTPConnection ("127.0.0.1:5000")
-            #conn.request("POST", "/reviews", params, headers)
             yield item
