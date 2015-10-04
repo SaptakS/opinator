@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from app import app, db
 from sentiment import StanfordNLP, VALUES
 from .models import *
-from config import LIFESPAN
+from config import LIFESPAN, WEBSITE_TO_SPIDER
 
 def is_present(website_name, product_id):
     """Checks if the product is already present in the database,
@@ -144,7 +144,10 @@ def plugin_response_handler():
             outdated = True
 
     #If it is not already analyzed, scraper is called
-    cmd = "scrapy crawl %s -a product_id=%s" % (website_name, product_id)
+    #prepare to run scraper
+    spider_name = WEBSITE_TO_SPIDER[website_name]
+
+    cmd = "scrapy crawl %s -a product_id=%s" % (spider_name, product_id)
     os.chdir("./scraper")
 
     #execution of the scraper
