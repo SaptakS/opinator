@@ -15,13 +15,13 @@ A plugin to do sentiment analysis of reviews in ecommerce website.
 
 ####Sentiment
 * Download the stanford corenlp module from [here](http://nlp.stanford.edu/software/corenlp.shtml)
-* Unzip it and place it in [mindwrap](https://github.com/SaptakS/opinator/tree/master/mindwrap).
+* Unzip it and place it in [analyzer](https://github.com/SaptakS/opinator/tree/master/analyzer).
 * Execute `export _JAVA_OPTIONS="-Xmx1024M"` in terminal.
-* Run [corenlp.py](https://github.com/SaptakS/opinator/blob/master/mindwrap/corenlp.py) module.
+* Run [corenlp.py](https://github.com/SaptakS/opinator/blob/master/analyzer/corenlp.py) module.
 * This will start your `json-rpc` server.
 
 ####Database
 * Make changes to `user` and `pass` in [DB_URI](https://github.com/SaptakS/opinator/blob/master/config.py#L15)
 * Create a mysql database named `op20`
-* [Grant all privileges to the user to this database](http://stackoverflow.com/questions/5016505/mysql-grant-all-privileges-on-database)
+* [Grant all privileges to the user to this database](http://stackoverflow.com/questions/5016505/mysql-grant-all-privileges-on-database/5016587#5016587)
 * Run [createdb.py](https://github.com/SaptakS/opinator/blob/master/createdb.py)
