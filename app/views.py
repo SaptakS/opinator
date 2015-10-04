@@ -20,7 +20,7 @@ def is_valid(product):
     """Checks if the product's date of view has expired
         or not. This function assumes that the product is
         already present in the database. The product's validity
-        is checked on the basis of a config varialbe: 'LIFESPAN',
+        is checked on the basis of a config variable: 'LIFESPAN',
         which simply stands for the number of days the sentiment
         is valid.
 
@@ -90,11 +90,11 @@ def categorize_sentiment(value):
 
     if value <= -1:
         result = 'Negative'
-        elif value > -0.5:
-            result = 'Positive'
-            value = abs(value)
-        else:
-            result = 'Neutral'
+    elif value > -0.5:
+        result = 'Positive'
+        value = abs(value)
+    else:
+        result = 'Neutral'
     return result
 
 def calculate_sentiment(reviews):

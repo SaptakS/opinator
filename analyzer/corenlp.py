@@ -1,31 +1,9 @@
-#!/usr/bin/env python
-#
-# corenlp  - Python interface to Stanford Core NLP tools
-# Copyright (c) 2012 Dustin Smith
-#   https://github.com/dasmith/stanford-corenlp-python
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-import xmltodict
 import json
 import optparse
 import os
 import re
 import sys
 import glob
-import traceback
 import pexpect
 import tempfile
 import shutil
@@ -35,15 +13,12 @@ from subprocess import call
 VERBOSE = False
 STATE_START, STATE_TEXT, STATE_WORDS, STATE_TREE, STATE_DEPENDENCY, STATE_COREFERENCE = 0, 1, 2, 3, 4, 5
 WORD_PATTERN = re.compile('\[([^\]]+)\]')
-#CR_PATTERN = re.compile(r"\((\d*),(\d)*,\[(\d*),(\d*)\]\) -> \((\d*),(\d)*,\[(\d*),(\d*)\]\), that is: \"(.*)\" -> \"(.*)\"")
-
-# Fixed by Diego Reforgiato. Otherwise src_pos gets one digit only
 CR_PATTERN = re.compile(r"\((\d*),(\d*),\[(\d*),(\d*)\]\) -> \((\d*),(\d*),\[(\d*),(\d*)\]\), that is: \"(.*)\" -> \"(.*)\"")
 
 if os.environ.has_key("CORENLP"):
     DIRECTORY = os.environ["CORENLP"]
 else:
-    DIRECTORY = "stanford-corenlp-full-2014-08-27"
+    DIRECTORY = "stanford-corenlp-full-2015-04-20"
 
 class bc:
     HEADER = '\033[95m'
@@ -106,8 +81,8 @@ def init_corenlp_command(corenlp_path, memory, properties):
             "javax.json.jar",
             "joda-time-2.1-sources.jar",
             "jollyday-0.4.7-sources.jar",
-            "stanford-corenlp-3.4.1-javadoc.jar",
-            "stanford-corenlp-3.4.1-sources.jar",
+            "stanford-corenlp-?.?.?-javadoc.jar",
+            "stanford-corenlp-?.?.?-sources.jar",
             "xom-1.2.10-src.jar"]
 
     java_path = "java"
@@ -170,6 +145,7 @@ def parse_bracketed(s):
 def parse_parser_results(text):
     """ This is the nasty bit of code to interact with the command-line
     interface of the CoreNLP tools.  Takes a string of the parser results
+
     and then returns a Python list of dictionaries, one for each parsed
     sentence.
     """
@@ -234,153 +210,6 @@ def parse_parser_results(text):
 
     return results
 
-
-def parse_parser_xml_results(xml, file_name="", raw_output=False):
-    import xmltodict
-    from collections import OrderedDict
-
-    def enforceList(list_or_ordered_dict): #TIM
-        if type(list_or_ordered_dict) == type(OrderedDict()):
-            return [list_or_ordered_dict]
-        else:
-            return list_or_ordered_dict
-
-    def extract_words_from_xml(sent_node):
-        if type(sent_node['tokens']['token']) == type(OrderedDict()):
-            # This is also specific case of xmltodict
-            exted = [sent_node['tokens']['token']]
-        else:
-            exted = sent_node['tokens']['token']
-        exted_string = map(lambda x: x['word'], exted)
-        return exted_string
-
-    # Turning the raw xml into a raw python dictionary:
-    raw_dict = xmltodict.parse(xml)
-    #return raw_dict
-    if raw_output:
-        return raw_dict
-
-    document = raw_dict[u'root'][u'document']
-
-    # Making a raw sentence list of dictionaries:
-    raw_sent_list = document[u'sentences'][u'sentence']
-
-    if document.get(u'coreference') and document[u'coreference'].get(u'coreference'):
-        # Convert coreferences to the format like python
-        coref_flag = True
-
-        # Making a raw coref dictionary:
-        raw_coref_list = document[u'coreference'][u'coreference']
-
-        # It is specific case that there is only one item for xmltodict
-        if len(raw_coref_list) == 1:
-            raw_coref_list = [raw_coref_list]
-        if len(raw_sent_list) == 1:
-            raw_sent_list = [raw_sent_list]
-
-        # This is also specific case of xmltodict
-        raw_sent_list = enforceList(raw_sent_list)
-
-        # To dicrease is for given index different from list index
-        coref_index = [[[int(raw_coref_list[j]['mention'][i]['sentence']) - 1,
-                         int(raw_coref_list[j]['mention'][i]['head']) - 1,
-                         int(raw_coref_list[j]['mention'][i]['start']) - 1,
-                         int(raw_coref_list[j]['mention'][i]['end']) - 1]
-                        for i in xrange(len(raw_coref_list[j][u'mention']))]
-                       for j in xrange(len(raw_coref_list))]
-
-        coref_list = []
-        for j in xrange(len(coref_index)):
-            coref_list.append(coref_index[j])
-            for k, coref in enumerate(coref_index[j]):
-                if type(raw_sent_list[coref[0]]['tokens']['token']) == type(OrderedDict()):
-                    # This is also specific case of xmltodict
-                    exted = [raw_sent_list[coref[0]]['tokens']['token']]
-                else:
-                    exted = raw_sent_list[coref[0]]['tokens']['token'][coref[2]:coref[3]]
-                exted_words = map(lambda x: x['word'], exted)
-                coref_list[j][k].insert(0, ' '.join(exted_words))
-
-        coref_list = [[[coref_list[j][i], coref_list[j][0]]
-                       for i in xrange(len(coref_list[j])) if i != 0]
-                      for j in xrange(len(coref_list))]
-    else:
-        coref_flag = False
-
-    # This is also specific case of xmltodict
-    raw_sent_list = enforceList(raw_sent_list) 
-    sentences = []
-    for id in xrange(len(raw_sent_list)):
-        sent = {}
-        sent['text'] = extract_words_from_xml(raw_sent_list[id])
-	
-        sentiment_value = raw_sent_list[id].get('@sentimentValue')
-        sentiment = raw_sent_list[id].get('@sentiment')
-	#print sentiment
-        if sentiment_value: sent['sentimentValue'] = int(sentiment_value)
-        if sentiment_value: sent['sentiment'] = sentiment
-
-        
-        sentences.append(sent)
-
-    #if coref_flag:
-    #    results = {'coref': coref_list, 'sentences': sentences}
-    else:
-        results = {'sentences': sentences}
-
-    if file_name:
-        results['file_name'] = file_name
-
-    return results
-
-
-def parse_xml_output(input_dir, corenlp_path=DIRECTORY, memory="3g", raw_output=False, properties='default.properties'):
-    """Because interaction with the command-line interface of the CoreNLP
-    tools is limited to very short text bits, it is necessary to parse xml
-    output"""
-    #First, we change to the directory where we place the xml files from the
-    #parser:
-
-    xml_dir = tempfile.mkdtemp()
-    file_list = tempfile.NamedTemporaryFile()
-
-    #we get a list of the cleaned files that we want to parse:
-
-    files = [input_dir + '/' + f for f in os.listdir(input_dir)]
-
-    #creating the file list of files to parse
-
-    file_list.write('\n'.join(files))
-    file_list.seek(0)
-
-    command = init_corenlp_command(corenlp_path, memory, properties)\
-        + ' -filelist %s -outputDirectory %s' % (file_list.name, xml_dir)
-
-    #creates the xml file of parser output:
-    print "DIRECTORY: ", DIRECTORY
-    print "command:", command
-    call(command, shell=True)
-
-    #reading in the raw xml file:
-    result = []
-    output_file = 'new_sample.xml'
-    try:
-	    for output_file in os.listdir(xml_dir):
-		with open(xml_dir + '/' + output_file, 'r') as xml:
-			parsed = xml.read()
-			print parsed
-			#doc = xmltodict.parse(parsed)
-			#print doc
-			file_name = re.sub('.xml$', '', os.path.basename(output_file))
-			result.append(parse_parser_xml_results(parsed, raw_output=raw_output))
-			#yield parse_parser_xml_results(parsed, file_name,
-			#                              raw_output=raw_output)
-    finally:
-    	   file_list.close()
-	    #shutil.rmtree(xml_dir)
-     	   return result
-
-
 class StanfordCoreNLP:
 
     """
@@ -424,8 +253,7 @@ class StanfordCoreNLP:
         # spawn the server
         self.serving = serving
         xml_dir_server = tempfile.mkdtemp()
-        self.start_corenlp = "java -cp \"./stanford-corenlp-full-2015-04-20/*\" -Xmx3g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators tokenize,ssplit,pos,parse,sentiment"
-        print "Command for SF parser: ", self.start_corenlp
+        self.start_corenlp = init_corenlp_command(corenlp_path, memory, properties)
         self._spawn_corenlp()
 
     def close(self, force=True):
@@ -533,22 +361,6 @@ class StanfordCoreNLP:
         return json.dumps(self.raw_parse(text))
 
 
-def batch_parse(input_folder, corenlp_path=DIRECTORY, memory="3g", raw_output=True):
-    """
-    This function takes input files,
-    sends list of input files to the Stanford parser,
-    reads in the results from temporary folder in your OS and
-    returns a generator object of list that consist of dictionary entry.
-    If raw_output is true, the dictionary returned will correspond exactly to XML.
-    ( The function needs xmltodict,
-    and doesn't need init 'StanfordCoreNLP' class. )
-    """
-    if not os.path.exists(input_folder):
-        raise Exception("input_folder does not exist")
-
-    return parse_xml_output(input_folder, corenlp_path, memory, raw_output=raw_output)
-
-
 def main():
     """
     The code below starts an JSONRPC server
@@ -567,8 +379,7 @@ def main():
                       help='Stanford CoreNLP properties fieles (default: default.properties)')
     options, args = parser.parse_args()
     VERBOSE = options.verbose
-    # server = jsonrpc.Server(jsonrpc.JsonRpc20(),
-    #                         jsonrpc.TransportTcpIp(addr=(options.host, int(options.port))))
+    
     try:
         server = SimpleJSONRPCServer((options.host, int(options.port)))
 
