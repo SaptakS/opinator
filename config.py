@@ -12,5 +12,5 @@ LIFESPAN = 0
 # Mapping of website_name to spider name
 #WEBSITE_TO_SPIDER = {'amazon.in': 'amazonIN'}
 
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:@localhost/op20'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://<user>:<pass>@localhost/opinator'
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
