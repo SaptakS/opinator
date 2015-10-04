@@ -1,23 +1,13 @@
+import scrapy
+import os
 from flask import request
 from flask.json import jsonify
 from datetime import datetime, timedelta
-import scrapy
-#from scrapy.crawler import CrawlerProcess
-import os
+
 from app import app, db
 from sentiment import StanfordNLP, VALUES
 from .models import *
 from config import LIFESPAN
-
-#from twisted.internet import reactor
-
-#from scrapy import log, signals
-#from scrapy.crawler import Crawler
-#from scrapy.settings import Settings
-#from scrapy.xlib.pydispatch import dispatcher
-
-def stop_reactor():
-    reactor.stop()
 
 def is_present(website_name, product_id):
     """Checks if the product is already present in the database,
@@ -30,7 +20,7 @@ def is_valid(product):
     """Checks if the product's date of view has expired
         or not. This function assumes that the product is
         already present in the database. The product's validity
-        is checked on the basis of a config varialbe: 'LIFESPAN',
+        is checked on the basis of a config variable: 'LIFESPAN',
         which simply stands for the number of days the sentiment
         is valid.
 
@@ -46,7 +36,7 @@ def is_valid(product):
 
 def insert(website_name, product_id, url,
             sentiment_score, sentiment):
-    """Inserts in the database"""
+    """Inserts new product in the database"""
 
     new_product = AmazonIN(product_id=product_id, url=url,
                             sentiment_score=sentiment_score,
@@ -67,28 +57,17 @@ def update(website_name, product_id, url,
     db.session.commit()
     return
 
-def recieve_reviews(reviews):
-    new_rev = ''
-    for i in reviews:
-        i.encode('utf-8')
-        new_rev += i
+def calculate_sum_sentiments(results):
+    """Calculates the sum of the sentiments.
+        Each type of sentiment is assigned some value
+        in the VALUES dictionary
+    """
 
-    #print new_rev
-    nlp = StanfordNLP()
-    results = nlp.parse(new_rev)
-    #print results
-    results = results['sentences']
-    #print results
-    value = 0
-    count = 0
-    positive_count = 0
-    negative_count = 0
-    neutral_count = 0
-    very_positive_count = 0
-    very_negative_count = 0
+    value, count = 0, 0
+    positive_count, negative_count, neutral_count = 0, 0, 0
+    very_positive_count, very_negative_count = 0, 0
     for result in results:
         count += 1
-        #print result['sentiment']
         if result['sentiment'] == "Negative":
             negative_count += 1
         elif result['sentiment'] == "Very Negative":
@@ -101,11 +80,14 @@ def recieve_reviews(reviews):
             neutral_count += 1
 
         value = value + VALUES[result['sentiment']]
-        #print "While assigning value"
-    if count:
-        value = float(value / (count * 1.0))
+    return (count, value, positive_count, negative_count, neutral_count,
+            very_positive_count, very_negative_count)
 
-    #print "value is: ", value
+def categorize_sentiment(value):
+    """Categorizes sentiment on the basis of
+        sentiment values
+    """
+
     if value <= -1:
         result = 'Negative'
     elif value > -0.5:
@@ -113,9 +95,33 @@ def recieve_reviews(reviews):
         value = abs(value)
     else:
         result = 'Neutral'
+    return result
 
-    #print(result)
-    return (value, result, positive_count, negative_count,
+def calculate_sentiment(reviews):
+    """Calculates the overall sentiment of the reviews"""
+
+    #encoding reviews
+    new_rev = ''
+    for i in reviews:
+        i.encode('utf-8')
+        new_rev += i
+
+    #getting the sentiment results
+    #from the analyzer module
+    nlp = StanfordNLP()
+    results = nlp.parse(new_rev)
+    results = results['sentences']
+
+
+    (count, value, positive_count, negative_count, neutral_count,
+            very_positive_count, very_negative_count) = calculate_sum_sentiments(results)
+
+    if count:
+        sentiment_value = float(value / (count * 1.0))
+
+    overall_sentiment = categorize_sentiment(sentiment_value)
+
+    return (sentiment_value, overall_sentiment, positive_count, negative_count,
                 very_positive_count, very_negative_count, neutral_count)
 
 @app.route('/', methods=['POST'])
@@ -126,9 +132,8 @@ def plugin_response_handler():
     product_id = request.json['product_id']
     url = request.json['url']
     website_name = request.json['website_name']
-    #print 'getting ', product_id, website_name
 
-
+    #checking if the product was already analyzed
     outdated = False
     product = is_present(website_name, product_id)
     if product is not None:
@@ -138,35 +143,22 @@ def plugin_response_handler():
         else:
             outdated = True
 
-    '''
-    ################## Running scrapy from script code ################
-    #dispatcher.connect(stop_reactor, signal=signals.spider_closed)
-    #spider = FollowAllSpider(domain='scrapinghub.com')
-    spider = AmazonINScraper(product_id)
-    crawler = Crawler(Settings())
-    crawler.signals.connect(reactor.stop, signal=signals.item_scraped)
-    crawler.configure()
-    crawler.crawl(spider)
-    print 'after crawler.crawl'
-    crawler.start()
-    log.start()
-    log.msg('Running reactor...')
-    reactor.run(installSignalHandlers=False)  # the script will block here until the spider is closed
-    log.msg('Reactor stopped.')
-    print 'after stopping of reactor'
-    '''
-
+    #If it is not already analyzed, scraper is called
     cmd = "scrapy crawl %s -a product_id=%s" % (website_name, product_id)
-    print 'present working directory', os.getcwd()
-    #os.chdir("/home/vivek/temp/opinator4/app/scraper")
     os.chdir("./scraper")
+
+    #execution of the scraper
     os.system(cmd)
-    #print 'after scrapy'
+
+    #the scraper pipelines the reviews to a text file, named as product_id
     with open('%s.txt' % str(product_id), 'r') as f:
-        #print f.read()
+
+        #read in the reviews and analyze the data
         (value, result, positive_count, negative_count, very_positive_count,
-                very_negative_count, neutral_count) = recieve_reviews(f.read())
+                very_negative_count, neutral_count) = calculate_sentiment(f.read())
     os.chdir("..")
+
+    #update the database if necessary otherwise, add a new product to the db
     if outdated:
         update(website_name=website_name, product_id=product_id, url=url,
                 sentiment_score=value, sentiment=str(result))
@@ -174,6 +166,7 @@ def plugin_response_handler():
         insert(website_name=website_name, product_id=product_id, url=url,
                 sentiment_score=value, sentiment=str(result))
 
+    #return the json object to the plugin
     return jsonify(sentiment_score=str(value), sentiment=str(result), positive_count=str(positive_count),
                     negative_count=str(negative_count), very_positive_count=str(very_positive_count),
                         very_negative_count=str(very_negative_count), neutral_count=str(neutral_count))
